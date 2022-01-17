@@ -1,37 +1,37 @@
 package web.dao;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import org.springframework.transaction.annotation.Transactional;
 import web.models.User;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 
 @Component
 public class UserDAO {
 
-
-    @Autowired
-    private UserRepository repository;
+    @PersistenceContext
+    EntityManager entityManager;
 
     public List<User> index() {
-        List<User> userList = repository.findAll();
-        return userList;
+        return entityManager.createQuery("select u from User u").getResultList();
     }
 
     public User show(int id) {
-        return repository.findById(id).orElse(null);
+        return entityManager.find(User.class, id);
+
     }
 
     @Transactional
     public void save(User user) {
-        repository.save(user);
+        entityManager.persist(user);
     }
 
     @Transactional
     public void update(int id, User updateUser) {
-        User userToBeUpdate = repository.getById(id);
+        User userToBeUpdate = entityManager.find(User.class, id);
         userToBeUpdate.setName(updateUser.getName());
         userToBeUpdate.setSurname(updateUser.getSurname());
         userToBeUpdate.setAge(updateUser.getAge());
@@ -40,6 +40,6 @@ public class UserDAO {
 
     @Transactional
     public void delete(int id) {
-        repository.deleteById(id);
+        entityManager.remove(entityManager.find(User.class, id));
     }
 }
